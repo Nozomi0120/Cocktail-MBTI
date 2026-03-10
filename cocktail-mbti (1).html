@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COCKTAIL COMPASS | あなただけの一杯を</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Noto+Serif+JP:wght@300;400;600&family=Cormorant+Garamond:ital,wght@0,300;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0705;
+    --surface: #130e0b;
+    --card: #1a1310;
+    --border: #3a2d24;
+    --gold: #c9a84c;
+    --gold-light: #e8c96a;
+    --amber: #d4813a;
+    --cream: #f0e6d3;
+    --muted: #7a6655;
+    --text: #e8ddd0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Serif JP', serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Noise texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Header */
+  header {
+    text-align: center;
+    padding: 60px 0 50px;
+    position: relative;
+  }
+
+  .header-line {
+    width: 1px;
+    height: 48px;
+    background: linear-gradient(to bottom, transparent, var(--gold));
+    margin: 0 auto 24px;
+  }
+
+  .header-label {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 13px;
+    letter-spacing: 0.4em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(36px, 7vw, 64px);
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    color: var(--cream);
+    line-height: 1.1;
+    margin-bottom: 12px;
+  }
+
+  .subtitle {
+    font-size: 13px;
+    color: var(--muted);
+    letter-spacing: 0.2em;
+    font-weight: 300;
+  }
+
+  .header-deco {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 28px;
+  }
+
+  .header-deco span {
+    display: block;
+    height: 1px;
+    width: 80px;
+    background: linear-gradient(to right, transparent, var(--border));
+  }
+
+  .header-deco span:last-child {
+    background: linear-gradient(to left, transparent, var(--border));
+  }
+
+  .diamond {
+    width: 6px;
+    height: 6px;
+    background: var(--gold);
+    transform: rotate(45deg);
+  }
+
+  /* Sliders section */
+  .sliders-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 40px 48px;
+    margin-bottom: 32px;
+    position: relative;
+  }
+
+  .sliders-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(to right, transparent, var(--gold), transparent);
+  }
+
+  .section-heading {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 12px;
+    letter-spacing: 0.35em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-heading::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .slider-row {
+    margin-bottom: 28px;
+  }
+
+  .slider-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 10px;
+  }
+
+  .slider-label {
+    font-size: 14px;
+    color: var(--cream);
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .slider-icon {
+    font-size: 16px;
+    opacity: 0.85;
+  }
+
+  .slider-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    color: var(--gold);
+    min-width: 24px;
+    text-align: right;
+    line-height: 1;
+  }
+
+  .slider-track {
+    position: relative;
+    height: 44px; /* 指で触れやすいタッチ領域 */
+    display: flex;
+    align-items: center;
+    margin: 0 0 4px;
+  }
+
+  /* 見た目上のトラック背景（細い線） */
+  .slider-track::before {
+    content: '';
+    position: absolute;
+    left: 0; right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    pointer-events: none;
+  }
+
+  .slider-fill {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 3px;
+    background: linear-gradient(to right, var(--amber), var(--gold-light));
+    border-radius: 2px;
+    transition: width 0.1s ease;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  input[type=range] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 44px; /* タッチ領域を確保 */
+    background: transparent;
+    position: relative;
+    z-index: 2;
+    cursor: pointer;
+    outline: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  input[type=range]::-webkit-slider-runnable-track {
+    height: 3px;
+    background: transparent;
+    border-radius: 2px;
+  }
+
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 22px;
+    height: 22px;
+    background: var(--gold);
+    border: 2px solid var(--bg);
+    border-radius: 50%;
+    box-shadow: 0 0 10px rgba(201, 168, 76, 0.5);
+    margin-top: -10px;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+
+  input[type=range]:active::-webkit-slider-thumb,
+  input[type=range]::-webkit-slider-thumb:hover {
+    transform: scale(1.25);
+    box-shadow: 0 0 20px rgba(201, 168, 76, 0.8);
+  }
+
+  input[type=range]::-moz-range-track {
+    height: 3px;
+    background: transparent;
+    border-radius: 2px;
+  }
+
+  input[type=range]::-moz-range-thumb {
+    width: 22px;
+    height: 22px;
+    background: var(--gold);
+    border: 2px solid var(--bg);
+    border-radius: 50%;
+    box-shadow: 0 0 10px rgba(201, 168, 76, 0.5);
+    cursor: pointer;
+  }
+
+  .slider-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    margin-top: 2px;
+  }
+
+  /* Button */
+  .find-btn {
+    display: block;
+    width: 100%;
+    padding: 18px;
+    background: transparent;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 15px;
+    letter-spacing: 0.5em;
+    text-transform: uppercase;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: color 0.3s;
+    margin-top: 8px;
+  }
+
+  .find-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--gold);
+    transform: translateX(-100%);
+    transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+    z-index: 0;
+  }
+
+  .find-btn:hover::before { transform: translateX(0); }
+  .find-btn:hover { color: var(--bg); }
+
+  .find-btn span {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Result */
+  #result-section {
+    display: none;
+    animation: fadeUp 0.6s ease forwards;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .result-header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  .result-header p {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 13px;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .result-header h2 {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.2em;
+    font-weight: 300;
+  }
+
+  .cocktails-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .cocktail-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 20px 24px;
+    position: relative;
+    transition: border-color 0.3s, transform 0.3s;
+    overflow: hidden;
+    cursor: default;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .cocktail-card:hover {
+    border-color: var(--gold);
+    transform: translateX(4px);
+  }
+
+  .cocktail-card.top-match {
+    border-color: var(--gold);
+  }
+
+  .cocktail-card.top-match::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, transparent, var(--gold), transparent);
+  }
+
+  .rank-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 40px;
+    font-weight: 400;
+    color: var(--border);
+    line-height: 1;
+    min-width: 44px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .cocktail-card.top-match .rank-number {
+    color: var(--gold);
+  }
+
+  .card-body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .card-top-row {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 4px;
+    flex-wrap: wrap;
+  }
+
+  .cocktail-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    color: var(--cream);
+    letter-spacing: 0.02em;
+  }
+
+  .cocktail-name-ja {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+  }
+
+  .cocktail-desc {
+    font-size: 12px;
+    line-height: 1.8;
+    color: #a09080;
+    margin-bottom: 10px;
+    font-weight: 300;
+  }
+
+  .cocktail-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+
+  .tag {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    padding: 2px 7px;
+    border-radius: 1px;
+  }
+
+  .match-score {
+    font-family: 'Playfair Display', serif;
+    font-size: 13px;
+    color: var(--muted);
+    flex-shrink: 0;
+    text-align: right;
+    min-width: 40px;
+  }
+
+  .cocktail-card.top-match .match-score { color: var(--gold); }
+
+  .match-badge {
+    display: none;
+  }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    padding: 32px 0;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.2em;
+    border-top: 1px solid var(--border);
+    margin-top: 60px;
+  }
+
+  /* Loading state */
+  .loading {
+    display: none;
+    text-align: center;
+    padding: 40px;
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    color: var(--gold);
+    letter-spacing: 0.3em;
+    font-size: 14px;
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* Share section */
+  .share-section {
+    margin-top: 36px;
+    padding-top: 32px;
+    border-top: 1px solid var(--border);
+    text-align: center;
+  }
+
+  .share-eyebrow {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 11px;
+    letter-spacing: 0.45em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+
+  .share-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .share-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 22px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-family: 'Noto Serif JP', serif;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    cursor: pointer;
+    border-radius: 1px;
+    transition: color 0.25s, border-color 0.25s, background 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .share-btn svg { flex-shrink: 0; transition: transform 0.2s; }
+  .share-btn:hover svg { transform: scale(1.15); }
+
+  .share-btn.x-btn:hover    { color: #fff;     border-color: #fff; }
+  .share-btn.line-btn:hover { color: #06C755;  border-color: #06C755; }
+  .share-btn.copy-btn:hover { color: var(--gold-light); border-color: var(--gold); }
+  .share-btn.copy-btn.done  { color: var(--gold); border-color: var(--gold); background: rgba(201,168,76,0.08); }
+
+  /* ── スマホ対応 ── */
+  @media (max-width: 600px) {
+
+    /* コンテナ余白を縮小 */
+    .container {
+      padding: 0 16px 60px;
+    }
+
+    /* ヘッダー */
+    header {
+      padding: 40px 0 36px;
+    }
+
+    .header-line {
+      height: 36px;
+    }
+
+    h1 {
+      font-size: 42px;
+      letter-spacing: 0.06em;
+    }
+
+    .subtitle {
+      font-size: 11px;
+      letter-spacing: 0.15em;
+    }
+
+    /* スライダーカード */
+    .sliders-card {
+      padding: 24px 20px;
+    }
+
+    .slider-row {
+      margin-bottom: 16px;
+    }
+
+    .slider-label {
+      font-size: 13px;
+    }
+
+    .slider-value {
+      font-size: 17px;
+    }
+
+    /* 検索ボタン */
+    .find-btn {
+      padding: 16px;
+      font-size: 13px;
+      letter-spacing: 0.35em;
+    }
+
+    /* 結果カード：横並び→縦積みに */
+    .cocktail-card {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0;
+      padding: 18px 18px 16px;
+    }
+
+    .rank-number {
+      font-size: 30px;
+      min-width: auto;
+      margin-bottom: 6px;
+      line-height: 1;
+    }
+
+    .card-body {
+      width: 100%;
+    }
+
+    .cocktail-name {
+      font-size: 18px;
+    }
+
+    .cocktail-desc {
+      font-size: 12px;
+      line-height: 1.75;
+    }
+
+    /* マッチ率を右上に絶対配置 */
+    .match-score {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      font-size: 12px;
+    }
+
+    /* シェアボタン縦並び */
+    .share-buttons {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+    }
+
+    .share-btn {
+      justify-content: center;
+      padding: 14px 16px;
+      font-size: 13px;
+    }
+
+    /* フッター */
+    footer {
+      margin-top: 40px;
+      font-size: 10px;
+      letter-spacing: 0.15em;
+    }
+  }
+
+  /* タブレット微調整 */
+  @media (min-width: 601px) and (max-width: 860px) {
+    .container {
+      padding: 0 32px 80px;
+    }
+
+    .sliders-card {
+      padding: 32px 36px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div class="header-line"></div>
+    <div class="header-label">Your Personal Bar Guide</div>
+    <h1>COCKTAIL<br>COMPASS</h1>
+    <p class="subtitle">あなただけの一杯を、見つけよう</p>
+    <div class="header-deco">
+      <span></span>
+      <div class="diamond"></div>
+      <span></span>
+    </div>
+  </header>
+
+  <div class="sliders-card">
+    <div class="section-heading">お好みを教えてください</div>
+
+    <div id="sliders"></div>
+
+    <button class="find-btn" onclick="findCocktail()">
+      <span>✦ &nbsp; カクテルを探す &nbsp; ✦</span>
+    </button>
+  </div>
+
+  <div class="loading" id="loading">Crafting your perfect drink...</div>
+
+  <div id="result-section">
+    <div class="result-header">
+      <p>Your Perfect Match</p>
+      <h2>あなたのお好みに合ったカクテルをご提案します</h2>
+    </div>
+    <div class="cocktails-grid" id="cocktails-grid"></div>
+
+    <div class="share-section" id="share-section" style="display:none">
+      <div class="share-eyebrow">Share your result</div>
+      <div class="share-buttons">
+        <button class="share-btn x-btn" onclick="shareX()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.258 5.63 5.906-5.63zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          X でシェア
+        </button>
+        <button class="share-btn line-btn" onclick="shareLine()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.630 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63h2.386c.349 0 .63.285.63.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63.349 0 .631.285.631.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.630 0 .344-.281.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
+          LINE でシェア
+        </button>
+        <button class="share-btn copy-btn" id="copy-btn" onclick="copyResult()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          <span id="copy-label">テキストをコピー</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <footer>COCKTAIL COMPASS &ensp;·&ensp; FIND YOUR PERFECT DRINK</footer>
+</div>
+
+<script>
+const sliderConfig = [
+  { id: 'sweet',    label: '甘さ',           icon: '🍯', low: '辛口',   high: '甘口' },
+  { id: 'sour',     label: '酸味',           icon: '🍋', low: '穏やか', high: '強い' },
+  { id: 'bitter',   label: '苦味',           icon: '🫚', low: '穏やか', high: '強い' },
+  { id: 'aroma',    label: '香りの強さ',     icon: '🌸', low: '控えめ', high: '華やか' },
+  { id: 'light',    label: '口当たりの軽さ', icon: '💧', low: '重厚',   high: '軽やか' },
+  { id: 'alcohol',  label: 'アルコールの強さ', icon: '🔥', low: '弱め', high: '強め' },
+  { id: 'carbonated', label: '炭酸の強さ',  icon: '✨', low: 'なし',   high: '強い' },
+];
+
+const cocktailDB = [
+  {
+    name: 'Mojito',     ja: 'モヒート',
+    desc: 'ミントとライムの爽快なハーモニー。炭酸と軽やかさが夏の夜を彩ります。',
+    tags: ['Rum', 'Mint', 'Lime', 'Classic'],
+    profile: { sweet: 2, sour: 4, bitter: 1, aroma: 4, light: 4, alcohol: 2, carbonated: 4 }
+  },
+  {
+    name: 'Aperol Spritz', ja: 'アペロール スプリッツ',
+    desc: 'イタリア発の苦甘爽快な食前酒。オレンジの香りとプロセッコの泡が絶妙。',
+    tags: ['Aperol', 'Prosecco', 'Italian', 'Spritz'],
+    profile: { sweet: 3, sour: 2, bitter: 3, aroma: 3, light: 3, alcohol: 2, carbonated: 4 }
+  },
+  {
+    name: 'Old Fashioned', ja: 'オールドファッションド',
+    desc: 'バーボンの深みとビターズの香り。時間をかけて楽しむ、大人の一杯。',
+    tags: ['Bourbon', 'Bitters', 'Classic', 'Stirred'],
+    profile: { sweet: 2, sour: 1, bitter: 4, aroma: 4, light: 1, alcohol: 5, carbonated: 1 }
+  },
+  {
+    name: 'Daiquiri',   ja: 'ダイキリ',
+    desc: 'ラム、ライム、シュガーの三位一体。シンプルながら完璧なバランス。',
+    tags: ['Rum', 'Lime', 'Simple', 'Shaken'],
+    profile: { sweet: 2, sour: 4, bitter: 1, aroma: 2, light: 3, alcohol: 3, carbonated: 1 }
+  },
+  {
+    name: 'Pina Colada', ja: 'ピニャコラーダ',
+    desc: 'ococonut とパイナップルのトロピカルな甘さ。リゾート気分を召し上がれ。',
+    tags: ['Rum', 'Coconut', 'Tropical', 'Blended'],
+    profile: { sweet: 5, sour: 2, bitter: 1, aroma: 4, light: 2, alcohol: 2, carbonated: 1 }
+  },
+  {
+    name: 'Negroni',   ja: 'ネグローニ',
+    desc: 'ジン、カンパリ、ベルモットの三角関係。苦みと甘みが複雑に絡み合う。',
+    tags: ['Gin', 'Campari', 'Bitter', 'Classic'],
+    profile: { sweet: 2, sour: 1, bitter: 5, aroma: 4, light: 1, alcohol: 4, carbonated: 1 }
+  },
+  {
+    name: 'Cosmopolitan', ja: 'コスモポリタン',
+    desc: 'クランベリーのルビー色が美しい。甘酸っぱくてスタイリッシュな一杯。',
+    tags: ['Vodka', 'Cranberry', 'Citrus', 'Modern'],
+    profile: { sweet: 3, sour: 3, bitter: 1, aroma: 3, light: 3, alcohol: 3, carbonated: 1 }
+  },
+  {
+    name: 'Gin & Tonic', ja: 'ジン＆トニック',
+    desc: '清涼感あふれるハーブの香り。シンプルで飽きのこない定番の爽快感。',
+    tags: ['Gin', 'Tonic', 'Refreshing', 'Classic'],
+    profile: { sweet: 2, sour: 1, bitter: 3, aroma: 4, light: 4, alcohol: 2, carbonated: 4 }
+  },
+  {
+    name: 'Whiskey Sour', ja: 'ウイスキーサワー',
+    desc: 'ウイスキーの深みとレモンの酸味が絶妙。泡立ちのあるシルキーな口当たり。',
+    tags: ['Whiskey', 'Lemon', 'Sour', 'Shaken'],
+    profile: { sweet: 2, sour: 4, bitter: 2, aroma: 3, light: 2, alcohol: 3, carbonated: 1 }
+  },
+  {
+    name: 'Margarita',   ja: 'マルガリータ',
+    desc: 'テキーラとライム、塩のリムが织りなす刺激的な組み合わせ。',
+    tags: ['Tequila', 'Lime', 'Salt', 'Classic'],
+    profile: { sweet: 2, sour: 4, bitter: 1, aroma: 3, light: 3, alcohol: 4, carbonated: 1 }
+  },
+  {
+    name: 'Espresso Martini', ja: 'エスプレッソ マティーニ',
+    desc: 'コーヒーの濃厚な香りとウォッカの力強さ。夜のエネルギーチャージに。',
+    tags: ['Vodka', 'Coffee', 'Bitter', 'Modern'],
+    profile: { sweet: 2, sour: 1, bitter: 4, aroma: 5, light: 1, alcohol: 4, carbonated: 1 }
+  },
+  {
+    name: 'Moscow Mule', ja: 'モスコミュール',
+    desc: 'ジンジャービアの刺激とライムの酸味。銅のカップで楽しむ清涼感。',
+    tags: ['Vodka', 'Ginger', 'Lime', 'Refreshing'],
+    profile: { sweet: 2, sour: 3, bitter: 2, aroma: 3, light: 4, alcohol: 2, carbonated: 4 }
+  },
+  {
+    name: 'Amaretto Sour', ja: 'アマレット サワー',
+    desc: 'アーモンドの甘い香りと酸味のバランスが絶品。デザート感覚の一杯。',
+    tags: ['Amaretto', 'Lemon', 'Sweet', 'Sour'],
+    profile: { sweet: 4, sour: 3, bitter: 1, aroma: 5, light: 2, alcohol: 2, carbonated: 1 }
+  },
+  {
+    name: 'Dark & Stormy', ja: 'ダーク＆ストーミー',
+    desc: 'ダークラムとジンジャービアが生み出す嵐のような深みと刺激。',
+    tags: ['Dark Rum', 'Ginger', 'Spicy', 'Bold'],
+    profile: { sweet: 2, sour: 2, bitter: 2, aroma: 3, light: 3, alcohol: 3, carbonated: 4 }
+  },
+  {
+    name: 'Kir Royale',   ja: 'キール ロワイヤル',
+    desc: 'シャンパンとカシスの贅沢なペアリング。祝いの席に相応しい上品な甘さ。',
+    tags: ['Champagne', 'Cassis', 'Elegant', 'Sparkling'],
+    profile: { sweet: 4, sour: 1, bitter: 1, aroma: 3, light: 3, alcohol: 2, carbonated: 5 }
+  },
+  {
+    name: 'Boulevardier', ja: 'ブールヴァルディエ',
+    desc: 'ネグローニのバーボン版。より甘くリッチな複雑さが冬の夜に溶け込む。',
+    tags: ['Bourbon', 'Campari', 'Vermouth', 'Stirred'],
+    profile: { sweet: 3, sour: 1, bitter: 4, aroma: 4, light: 1, alcohol: 4, carbonated: 1 }
+  },
+  {
+    name: 'Aperitivo Spritz', ja: 'ヒューゴ スプリッツ',
+    desc: 'エルダーフラワーの花香とミントが織りなす軽やかな春の味わい。',
+    tags: ['Elderflower', 'Prosecco', 'Mint', 'Light'],
+    profile: { sweet: 3, sour: 1, bitter: 1, aroma: 5, light: 5, alcohol: 1, carbonated: 5 }
+  },
+  {
+    name: 'Long Island Iced Tea', ja: 'ロングアイランド アイスティー',
+    desc: '5種のスピリッツを隠した危険なほど飲みやすい一杯。見た目に騙されるな。',
+    tags: ['Multi-spirit', 'Strong', 'Deceptive', 'Long'],
+    profile: { sweet: 3, sour: 3, bitter: 1, aroma: 2, light: 3, alcohol: 5, carbonated: 2 }
+  },
+  {
+    name: 'Clover Club', ja: 'クローバー クラブ',
+    desc: 'ラズベリーの甘みとレモンの酸味、泡立つ卵白のシルク感が美しい。',
+    tags: ['Gin', 'Raspberry', 'Egg White', 'Pink'],
+    profile: { sweet: 4, sour: 3, bitter: 1, aroma: 3, light: 3, alcohol: 2, carbonated: 1 }
+  },
+  {
+    name: 'Paloma', ja: 'パロマ',
+    desc: 'テキーラとグレープフルーツの苦甘爽快な組み合わせ。メキシコの太陽の味。',
+    tags: ['Tequila', 'Grapefruit', 'Soda', 'Refreshing'],
+    profile: { sweet: 2, sour: 3, bitter: 3, aroma: 3, light: 4, alcohol: 3, carbonated: 4 }
+  },
+];
+
+// Build sliders
+const slidersEl = document.getElementById('sliders');
+sliderConfig.forEach(cfg => {
+  const row = document.createElement('div');
+  row.className = 'slider-row';
+  row.innerHTML = `
+    <div class="slider-header">
+      <span class="slider-label"><span class="slider-icon">${cfg.icon}</span>${cfg.label}</span>
+      <span class="slider-value" id="val-${cfg.id}">3</span>
+    </div>
+    <div class="slider-track">
+      <div class="slider-fill" id="fill-${cfg.id}" style="width:50%"></div>
+      <input type="range" min="1" max="5" value="3" id="slider-${cfg.id}"
+        oninput="updateSlider('${cfg.id}', this.value)">
+    </div>
+    <div class="slider-labels"><span>${cfg.low}</span><span>${cfg.high}</span></div>
+  `;
+  slidersEl.appendChild(row);
+});
+
+function updateSlider(id, val) {
+  document.getElementById('val-' + id).textContent = val;
+  document.getElementById('fill-' + id).style.width = ((val - 1) / 4 * 100) + '%';
+}
+
+function getValues() {
+  const vals = {};
+  sliderConfig.forEach(cfg => {
+    vals[cfg.id] = parseInt(document.getElementById('slider-' + cfg.id).value);
+  });
+  return vals;
+}
+
+function calcScore(prefs, profile) {
+  let dist = 0;
+  Object.keys(prefs).forEach(k => {
+    dist += Math.pow(prefs[k] - profile[k], 2);
+  });
+  return dist;
+}
+
+function findCocktail() {
+  const prefs = getValues();
+
+  // Score and sort
+  const scored = cocktailDB.map(c => ({
+    ...c,
+    score: calcScore(prefs, c.profile)
+  })).sort((a, b) => a.score - b.score);
+
+  const top = scored.slice(0, 4);
+  renderResults(top);
+}
+
+function renderResults(cocktails) {
+  const grid = document.getElementById('cocktails-grid');
+  const section = document.getElementById('result-section');
+
+  grid.innerHTML = '';
+  _topCocktail = cocktails[0].ja;
+
+  cocktails.forEach((c, i) => {
+    const card = document.createElement('div');
+    card.className = 'cocktail-card' + (i === 0 ? ' top-match' : '');
+
+    const maxScore = 7 * 16;
+    const matchPct = Math.round((1 - c.score / maxScore) * 100);
+
+    card.innerHTML = `
+      <div class="rank-number">${i + 1}</div>
+      <div class="card-body">
+        <div class="card-top-row">
+          <div class="cocktail-name">${c.name}</div>
+          <div class="cocktail-name-ja">${c.ja}</div>
+        </div>
+        <div class="cocktail-desc">${c.desc}</div>
+        <div class="cocktail-tags">
+          ${c.tags.map(t => `<span class="tag">${t}</span>`).join('')}
+        </div>
+      </div>
+      <div class="match-score">${matchPct}%</div>
+    `;
+    grid.appendChild(card);
+  });
+
+  section.style.display = 'block';
+  section.style.animation = 'none';
+  section.offsetHeight;
+  section.style.animation = 'fadeUp 0.6s ease forwards';
+
+  // 共有ボタンを表示
+  document.getElementById('share-section').style.display = 'block';
+
+  setTimeout(() => {
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 100);
+}
+
+// ---- SNS シェア ----
+let _topCocktail = '';
+
+function shareX() {
+  const text = `🍸 COCKTAIL COMPASSで診断したら「${_topCocktail}」が1位でした！\nあなたのベストカクテルは？`;
+  window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text), '_blank');
+}
+
+function shareLine() {
+  const text = `🍸 私のベストカクテルは「${_topCocktail}」！\nCOCKTAIL COMPASSで診断してみて🍹`;
+  window.open('https://social-plugins.line.me/lineit/share?url=' + encodeURIComponent(location.href) + '&text=' + encodeURIComponent(text), '_blank');
+}
+
+function copyResult() {
+  const text = `🍸 COCKTAIL COMPASS 診断結果\n1位：${_topCocktail}\n\nあなたも試してみて！`;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copy-btn');
+    const label = document.getElementById('copy-label');
+    btn.classList.add('done');
+    label.textContent = 'コピーしました！';
+    setTimeout(() => {
+      btn.classList.remove('done');
+      label.textContent = 'テキストをコピー';
+    }, 2500);
+  });
+}
+</script>
+</body>
+</html>
